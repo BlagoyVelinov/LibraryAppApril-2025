@@ -1,0 +1,35 @@
+name: Build Test and Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_test:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: Install NPM modules
+      run: npm install
+    - name: Start backend
+      run: npm run start-be &
+    - name: Start frontend
+      run: npm run start-fe &
+    - name: Install Browsers
+      run: npx playwright install
+    - name: Execute UI tests
+      run: npm run test:ui
